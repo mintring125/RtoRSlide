@@ -23,12 +23,12 @@ body {
     gap: 40px;
     align-items: center;
     margin: 0;
-    padding: 40px 0;
+    padding: 20px 0; /* 모바일 여백 축소 */
     min-height: 100vh;
     font-family: 'Jua', sans-serif;
 }
 
-/* 슬라이드 컨테이너 */
+/* 슬라이드 컨테이너 - 반응형 적용 */
 .slide-container {
     align-items: center;
     background-color: #fcfcfc;
@@ -36,26 +36,44 @@ body {
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    height: 720px;
     justify-content: center;
     overflow: hidden;
-    padding: 40px;
+    padding: 30px; /* 패딩 축소 */
     position: relative;
-    width: 1280px;
-    max-width: 95vw;
+    
+    /* 반응형 사이즈 설정 */
+    width: 95%; 
+    max-width: 1280px;
+    
+    /* 기본은 16:9 비율 유지하되, 화면이 좁으면 높이 자동 조절 */
+    aspect-ratio: 16/9; 
+    min-height: 500px; /* 최소 높이 보장 */
+    height: auto;
+    
     transition: background-color 0.3s ease;
     flex-shrink: 0;
+}
+
+/* 모바일/태블릿 세로 모드 대응 */
+@media (max-width: 1024px) {
+    .slide-container {
+        aspect-ratio: auto; /* 비율 해제 */
+        min-height: 60vh;
+        padding: 20px;
+    }
 }
 
 /* 배경 장식 */
 .slide-container::before {
     content: '';
     position: absolute;
-    width: 600px;
-    height: 600px;
+    width: 50vw;
+    height: 50vw;
+    max-width: 600px;
+    max-height: 600px;
     background: radial-gradient(circle, #dcfd8b33 0%, transparent 70%);
-    top: -200px;
-    right: -200px;
+    top: -15%;
+    right: -15%;
     border-radius: 50%;
     z-index: 0;
     pointer-events: none;
@@ -64,11 +82,13 @@ body {
 .slide-container::after {
     content: '';
     position: absolute;
-    width: 500px;
-    height: 500px;
+    width: 40vw;
+    height: 40vw;
+    max-width: 500px;
+    max-height: 500px;
     background: radial-gradient(circle, #bc84ee33 0%, transparent 70%);
-    bottom: -150px;
-    left: -150px;
+    bottom: -10%;
+    left: -10%;
     border-radius: 50%;
     z-index: 0;
     pointer-events: none;
@@ -77,12 +97,14 @@ body {
 .slide-container > * {
     position: relative;
     z-index: 2;
+    width: 100%; /* 컨텐츠 너비 확보 */
 }
 
-/* 2. 타이포그래피 */
+/* 2. 타이포그래피 (반응형 폰트 clamp 사용) */
 h1 {
     font-family: 'Do Hyeon', sans-serif;
-    font-size: 100px;
+    /* 최소 40px, 화면의 8%, 최대 100px */
+    font-size: clamp(40px, 8vw, 100px); 
     color: #1e293b;
     margin: 0;
     text-shadow: 2px 2px 0px #dcfd8b;
@@ -92,14 +114,15 @@ h1 {
 
 h2 {
     font-family: 'Do Hyeon', sans-serif;
-    font-size: 60px;
+    font-size: clamp(30px, 5vw, 60px);
     color: #334155;
-    margin-bottom: 30px;
+    margin-bottom: clamp(15px, 3vw, 30px);
+    text-align: center;
 }
 
 p, li {
     font-family: 'Jua', sans-serif;
-    font-size: 28px;
+    font-size: clamp(18px, 2.5vw, 28px);
     color: #475569;
     line-height: 1.6;
 }
@@ -110,20 +133,39 @@ p, li {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 30px;
+    gap: clamp(15px, 3vw, 30px);
+}
+
+.title-icon-group i {
+    font-size: clamp(40px, 6vw, 60px); 
+    margin: 0 10px;
 }
 
 .two-column {
     display: flex;
     width: 100%;
-    gap: 50px;
+    gap: 30px;
     align-items: center;
     justify-content: space-between;
 }
 
+/* 모바일에서 컬럼 세로 배치 */
+@media (max-width: 768px) {
+    .two-column {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .image-wrapper {
+        width: 100%;
+        height: 250px !important; /* 모바일 이미지 높이 고정 */
+        order: -1; /* 이미지를 위로 */
+    }
+}
+
 .image-wrapper {
     flex: 1;
-    height: 500px;
+    height: 100%;
+    min-height: 300px;
     border-radius: 30px;
     overflow: hidden;
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
@@ -140,14 +182,14 @@ p, li {
     flex: 1;
 }
 
-/* 4. 게임 보드 스타일 */
+/* 4. 게임 보드 스타일 - Flexbox 재설계 */
 .game-board {
     width: 100%;
     height: 100%;
+    min-height: 400px; /* 최소 높이 */
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column; /* 세로 정렬 */
+    justify-content: space-between; /* 위-중간-아래 분산 배치 */
     background-color: #fff;
     border-radius: 30px;
     border: 5px solid #1e293b;
@@ -156,6 +198,7 @@ p, li {
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.1s, border-color 0.3s;
+    padding: 20px;
 }
 
 .game-board:active {
@@ -168,72 +211,78 @@ p, li {
     box-shadow: 10px 10px 0px #ff823a;
 }
 
-/* 문제 텍스트 영역 */
-.quiz-display {
-    font-family: 'Do Hyeon', sans-serif;
-    font-size: 180px;
-    color: #1e293b;
-    text-align: center;
-    transition: all 0.3s ease;
-    user-select: none;
-    width: 100%;
-    padding: 0 20px;
-    pointer-events: none;
-}
-
-/* 숨김 상태 (화살표) */
-.hidden-state {
-    color: #ff823a;
-    font-size: 200px;
-    animation: bounce 1.5s infinite;
-}
-
-/* 상단 정보 (모둠명, 점수판) */
+/* 상단 정보 (모둠명, 점수판) - Flex item */
 .board-header {
-    position: absolute;
-    top: 30px;
-    left: 40px;
-    right: 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
     pointer-events: none;
+    margin-bottom: 20px;
 }
 
 .quiz-counter {
     background-color: #bc84ee;
     color: #fff;
-    padding: 10px 25px;
+    padding: 8px 20px;
     border-radius: 50px;
-    font-size: 30px;
+    font-size: clamp(20px, 3vw, 30px);
     font-weight: bold;
+    white-space: nowrap;
 }
 
 /* 점수판 스타일 */
 .score-board {
     background-color: #1e293b;
-    color: #ffcc00; /* 노란색 강조 */
-    padding: 10px 30px;
+    color: #ffcc00;
+    padding: 8px 25px;
     border-radius: 15px;
-    font-size: 40px;
+    font-size: clamp(24px, 4vw, 40px);
     font-family: 'Do Hyeon', sans-serif;
     box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+    white-space: nowrap;
 }
 
-/* 컨트롤 버튼 영역 */
+/* 문제 텍스트 영역 - Flex grow로 중앙 차지 */
+.quiz-display {
+    font-family: 'Do Hyeon', sans-serif;
+    font-size: clamp(60px, 15vw, 180px); /* 폰트 사이즈 반응형 */
+    color: #1e293b;
+    text-align: center;
+    transition: all 0.3s ease;
+    user-select: none;
+    width: 100%;
+    flex-grow: 1; /* 남은 공간 모두 차지 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    pointer-events: none;
+    margin: 20px 0;
+}
+
+/* 숨김 상태 (화살표) */
+.hidden-state {
+    color: #ff823a;
+    font-size: clamp(80px, 20vw, 200px);
+    animation: bounce 1.5s infinite;
+}
+
+/* 컨트롤 버튼 영역 - Flex item */
 .control-area {
-    position: absolute;
-    bottom: 30px;
     display: flex;
     gap: 15px;
     z-index: 10;
     align-items: center;
+    justify-content: center; /* 중앙 정렬 */
+    width: 100%;
+    flex-wrap: wrap; /* 좁으면 줄바꿈 */
 }
 
 .btn {
     border: none;
-    padding: 15px 30px;
-    font-size: 24px;
+    padding: clamp(10px, 2vw, 15px) clamp(20px, 3vw, 30px);
+    font-size: clamp(18px, 2.5vw, 24px);
     border-radius: 15px;
     cursor: pointer;
     font-family: 'Jua', sans-serif;
@@ -252,10 +301,9 @@ p, li {
 
 /* 정답 버튼 (+1) */
 .btn-score {
-    background-color: #22c55e; /* 녹색 */
+    background-color: #22c55e;
     color: #fff;
-    font-size: 28px;
-    padding: 15px 40px;
+    font-size: clamp(20px, 3vw, 28px);
     border-bottom: 5px solid #15803d;
 }
 
@@ -264,7 +312,6 @@ p, li {
     transform: translateY(3px);
 }
 
-/* 비활성화 된 버튼 스타일 추가 */
 .btn-score:disabled {
     background-color: #cbd5e1;
     border-bottom-color: #94a3b8;
@@ -278,8 +325,8 @@ p, li {
 .btn-reset {
     background-color: #94a3b8;
     color: #fff;
-    width: 60px;
-    height: 60px;
+    width: clamp(50px, 8vw, 60px);
+    height: clamp(50px, 8vw, 60px);
     padding: 0;
     display: flex;
     align-items: center;
@@ -290,21 +337,30 @@ p, li {
 }
 
 .btn-reset.confirming {
-    background-color: #ef4444; /* 확인 시 빨간색 */
+    background-color: #ef4444;
     border-bottom-color: #b91c1c;
 }
 
-/* 키보드 안내 힌트 */
+/* 키보드 안내 힌트 - 모바일 숨김 처리 */
 .keyboard-hint {
     position: absolute;
     top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
+    right: 10px;
+    transform: translateY(-50%) rotate(90deg); /* 공간 절약을 위해 세로로? 아니면 그냥 위치 조정 */
+    transform-origin: center right;
     color: #94a3b8;
     font-size: 14px;
     text-align: center;
     opacity: 0.5;
     pointer-events: none;
+    display: none; /* 기본 숨김, 큰 화면에서 표시 */
+}
+
+@media (min-width: 1025px) {
+    .keyboard-hint {
+        display: block;
+        transform: translateY(-50%); /* 데스크탑에서는 정상 표시 */
+    }
 }
 
 @keyframes bounce {
@@ -326,13 +382,13 @@ p, li {
 <!-- Slide 1: 타이틀 -->
 <div class="slide-container" id="slide1">
     <div class="title-layout">
-        <div style="font-size: 40px; color: #ff823a; margin-bottom: -20px;"><i class="fa-solid fa-star"></i> 몸으로 말해요 <i class="fa-solid fa-star"></i></div>
+        <div style="font-size: clamp(24px, 4vw, 40px); color: #ff823a; margin-bottom: -10px;"><i class="fa-solid fa-star"></i> 몸으로 말해요 <i class="fa-solid fa-star"></i></div>
         <h1>방과 방 사이<br>스피드 퀴즈</h1>
         <p>친구들의 몸짓을 보고 정답을 맞혀보세요!</p>
-        <div style="margin-top: 30px;">
-            <i class="fa-solid fa-shapes fa-spin" style="font-size: 60px; color: #bc84ee; margin: 0 20px;"></i>
-            <i class="fa-solid fa-bolt" style="font-size: 60px; color: #ff823a; margin: 0 20px;"></i>
-            <i class="fa-solid fa-face-laugh-squint" style="font-size: 60px; color: #dcfd8b; margin: 0 20px;"></i>
+        <div class="title-icon-group" style="margin-top: 30px;">
+            <i class="fa-solid fa-shapes fa-spin" style="color: #bc84ee;"></i>
+            <i class="fa-solid fa-bolt" style="color: #ff823a;"></i>
+            <i class="fa-solid fa-face-laugh-squint" style="color: #dcfd8b;"></i>
         </div>
     </div>
 </div>
@@ -343,17 +399,17 @@ p, li {
     <div class="two-column">
         <div class="text-content">
             <ul style="list-style: none; padding: 0;">
-                <li style="margin-bottom: 20px;">
-                    <span style="font-size: 30px; color: #ff823a; font-weight: bold;">1.</span>
-                    <strong>배경 클릭/화살표(→):</strong> 다음 단계로 넘어갑니다. (문제 제시 ↔ 가리기)
+                <li style="margin-bottom: 15px;">
+                    <span style="font-size: 1.2em; color: #ff823a; font-weight: bold;">1.</span>
+                    <strong>배경 클릭/화살표(→):</strong><br>다음 단계로 넘어갑니다. (문제 ↔ 가리기)
                 </li>
-                <li style="margin-bottom: 20px;">
-                    <span style="font-size: 30px; color: #22c55e; font-weight: bold;">2.</span>
-                    <strong>정답(+1) 버튼:</strong> 정답을 맞히면 누르세요. <strong>1점 획득</strong>하고 다음으로 넘어갑니다.
+                <li style="margin-bottom: 15px;">
+                    <span style="font-size: 1.2em; color: #22c55e; font-weight: bold;">2.</span>
+                    <strong>정답(+1) 버튼:</strong><br>정답을 맞히면 누르세요. 1점 획득!
                 </li>
-                <li style="margin-bottom: 20px;">
-                    <span style="font-size: 30px; color: #bc84ee; font-weight: bold;">3.</span>
-                    <strong>화살표(←):</strong> 이전 상태로 되돌립니다.
+                <li style="margin-bottom: 15px;">
+                    <span style="font-size: 1.2em; color: #bc84ee; font-weight: bold;">3.</span>
+                    <strong>화살표(←):</strong><br>이전 상태로 되돌립니다.
                 </li>
             </ul>
         </div>
@@ -372,7 +428,7 @@ p, li {
         </div>
         
         <div class="quiz-display" id="display-1">
-            <div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
+            <div style="font-size: 0.5em;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
         </div>
         
         <div class="control-area">
@@ -392,7 +448,7 @@ p, li {
         </div>
 
         <div class="quiz-display" id="display-2">
-            <div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
+            <div style="font-size: 0.5em;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
         </div>
 
         <div class="control-area">
@@ -412,7 +468,7 @@ p, li {
         </div>
 
         <div class="quiz-display" id="display-3">
-            <div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
+            <div style="font-size: 0.5em;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
         </div>
 
         <div class="control-area">
@@ -432,7 +488,7 @@ p, li {
         </div>
 
         <div class="quiz-display" id="display-4">
-            <div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
+            <div style="font-size: 0.5em;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
         </div>
 
         <div class="control-area">
@@ -462,7 +518,6 @@ p, li {
             4: ["판다", "계산기", "타조", "장갑", "악어", "시계", "백조", "목걸이", "너구리", "휴지", "공작새", "램프", "늑대", "냄비", "코알라", "드라이기", "양", "신발", "여우", "농구공"]
         };
 
-        // score 추가
         const gameState = {
             1: { index: 0, viewMode: 'ready', score: 0 },
             2: { index: 0, viewMode: 'ready', score: 0 },
@@ -480,7 +535,7 @@ p, li {
         const observerOptions = {
             root: null,
             rootMargin: '0px',
-            threshold: 0.6 
+            threshold: 0.5 // 조금 더 유연하게 50%로 변경
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -565,13 +620,10 @@ p, li {
         function handleScoreAndNext(groupId) {
             const state = gameState[groupId];
             
-            // '전달하세요(hide)' 상태에서는 동작하지 않음 (안전장치)
+            // '전달하세요(hide)' 상태에서는 동작하지 않음
             if (state.viewMode === 'hide') return;
 
-            // 점수 증가
             state.score++;
-            
-            // 다음 단계로 강제 이동
             nextStep(groupId);
         }
 
@@ -603,13 +655,13 @@ p, li {
             const display = document.getElementById(`display-${groupId}`);
             const counter = document.getElementById(`counter-${groupId}`);
             const scoreBoard = document.getElementById(`score-${groupId}`);
-            const scoreBtn = document.getElementById(`btn-score-${groupId}`); // 버튼 선택
+            const scoreBtn = document.getElementById(`btn-score-${groupId}`);
             const words = quizData[groupId];
 
             // 점수판 업데이트
             scoreBoard.innerText = `${state.score}점`;
 
-            // 정답 버튼 상태 관리 ('전달하세요' 상태에서는 비활성화)
+            // 정답 버튼 상태 관리
             if (state.viewMode === 'hide' || state.viewMode === 'end' || state.viewMode === 'ready') {
                 scoreBtn.disabled = true;
             } else {
@@ -618,17 +670,17 @@ p, li {
 
             if (state.viewMode === 'ready') {
                 counter.innerText = `${groupId}모둠`;
-                display.innerHTML = `<div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>`;
+                display.innerHTML = `<div style="font-size: 0.5em;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>`;
                 display.className = "quiz-display";
             } else if (state.viewMode === 'show') {
                 counter.innerText = `${groupId}모둠 - ${state.index + 1}/${words.length}`;
                 display.innerHTML = `<div>${words[state.index]}</div>`;
                 display.className = "quiz-display";
             } else if (state.viewMode === 'hide') {
-                display.innerHTML = `<i class="fa-solid fa-arrow-right-long hidden-state"></i><div style="font-size:40px; margin-top:20px;">전달하세요!</div>`;
+                display.innerHTML = `<i class="fa-solid fa-arrow-right-long hidden-state"></i><div style="font-size:0.3em; margin-top:20px;">전달하세요!</div>`;
             } else if (state.viewMode === 'end') {
                 counter.innerText = `${groupId}모둠 - 완료`;
-                display.innerHTML = `<div style="font-size: 60px; color: #ef4444;">끝!</div>`;
+                display.innerHTML = `<div style="font-size: 0.5em; color: #ef4444;">끝!</div>`;
             }
         }
 
@@ -638,7 +690,7 @@ p, li {
                 resetState[groupId] = true;
                 btn.classList.add('confirming');
             } else {
-                gameState[groupId] = { index: 0, viewMode: 'ready', score: 0 }; // 점수도 0으로
+                gameState[groupId] = { index: 0, viewMode: 'ready', score: 0 };
                 updateDisplay(groupId);
                 resetResetButton(groupId);
             }
