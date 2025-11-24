@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방과 방 사이 퀴즈</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;500;700&family=Jua&family=Do+Hyeon&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+/* 1. 기본 설정 */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: center;
+    margin: 0;
+    padding: 40px 0;
+    min-height: 100vh;
+    font-family: 'Jua', sans-serif;
+}
+
+/* 슬라이드 컨테이너 */
+.slide-container {
+    align-items: center;
+    background-color: #fcfcfc;
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 720px;
+    justify-content: center;
+    overflow: hidden;
+    padding: 40px;
+    position: relative;
+    width: 1280px;
+    max-width: 95vw;
+    transition: background-color 0.3s ease;
+    flex-shrink: 0;
+}
+
+/* 배경 장식 */
+.slide-container::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #dcfd8b33 0%, transparent 70%);
+    top: -200px;
+    right: -200px;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.slide-container::after {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, #bc84ee33 0%, transparent 70%);
+    bottom: -150px;
+    left: -150px;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.slide-container > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* 2. 타이포그래피 */
+h1 {
+    font-family: 'Do Hyeon', sans-serif;
+    font-size: 100px;
+    color: #1e293b;
+    margin: 0;
+    text-shadow: 2px 2px 0px #dcfd8b;
+    text-align: center;
+    line-height: 1.2;
+}
+
+h2 {
+    font-family: 'Do Hyeon', sans-serif;
+    font-size: 60px;
+    color: #334155;
+    margin-bottom: 30px;
+}
+
+p, li {
+    font-family: 'Jua', sans-serif;
+    font-size: 28px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+/* 3. 레이아웃 컴포넌트 */
+.title-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 30px;
+}
+
+.two-column {
+    display: flex;
+    width: 100%;
+    gap: 50px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.image-wrapper {
+    flex: 1;
+    height: 500px;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.text-content {
+    flex: 1;
+}
+
+/* 4. 게임 보드 스타일 */
+.game-board {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border-radius: 30px;
+    border: 5px solid #1e293b;
+    box-shadow: 10px 10px 0px #1e293b;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.3s;
+}
+
+.game-board:active {
+    transform: scale(0.99);
+    box-shadow: 5px 5px 0px #1e293b;
+}
+
+.game-board.active-focus {
+    border-color: #ff823a;
+    box-shadow: 10px 10px 0px #ff823a;
+}
+
+/* 문제 텍스트 영역 */
+.quiz-display {
+    font-family: 'Do Hyeon', sans-serif;
+    font-size: 180px;
+    color: #1e293b;
+    text-align: center;
+    transition: all 0.3s ease;
+    user-select: none;
+    width: 100%;
+    padding: 0 20px;
+    pointer-events: none;
+}
+
+/* 숨김 상태 (화살표) */
+.hidden-state {
+    color: #ff823a;
+    font-size: 200px;
+    animation: bounce 1.5s infinite;
+}
+
+/* 상단 정보 (모둠명, 점수판) */
+.board-header {
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    right: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+}
+
+.quiz-counter {
+    background-color: #bc84ee;
+    color: #fff;
+    padding: 10px 25px;
+    border-radius: 50px;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+/* 점수판 스타일 */
+.score-board {
+    background-color: #1e293b;
+    color: #ffcc00; /* 노란색 강조 */
+    padding: 10px 30px;
+    border-radius: 15px;
+    font-size: 40px;
+    font-family: 'Do Hyeon', sans-serif;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
+}
+
+/* 컨트롤 버튼 영역 */
+.control-area {
+    position: absolute;
+    bottom: 30px;
+    display: flex;
+    gap: 15px;
+    z-index: 10;
+    align-items: center;
+}
+
+.btn {
+    border: none;
+    padding: 15px 30px;
+    font-size: 24px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-family: 'Jua', sans-serif;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* 정답 버튼 (+1) */
+.btn-score {
+    background-color: #22c55e; /* 녹색 */
+    color: #fff;
+    font-size: 28px;
+    padding: 15px 40px;
+    border-bottom: 5px solid #15803d;
+}
+
+.btn-score:active {
+    border-bottom: 2px solid #15803d;
+    transform: translateY(3px);
+}
+
+/* 비활성화 된 버튼 스타일 추가 */
+.btn-score:disabled {
+    background-color: #cbd5e1;
+    border-bottom-color: #94a3b8;
+    color: #64748b;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 리셋 버튼 (작게) */
+.btn-reset {
+    background-color: #94a3b8;
+    color: #fff;
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 20px;
+    border-bottom: 4px solid #64748b;
+}
+
+.btn-reset.confirming {
+    background-color: #ef4444; /* 확인 시 빨간색 */
+    border-bottom-color: #b91c1c;
+}
+
+/* 키보드 안내 힌트 */
+.keyboard-hint {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+    text-align: center;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateX(0);}
+    40% {transform: translateX(30px);}
+    60% {transform: translateX(15px);}
+}
+
+/* 모둠별 테마 색상 */
+.theme-1 { background-color: #dcfd8b; }
+.theme-2 { background-color: #fdd5bd; }
+.theme-3 { background-color: #bc84ee; }
+.theme-4 { background-color: #a5f3fc; }
+
+</style>
+</head>
+<body>
+
+<!-- Slide 1: 타이틀 -->
+<div class="slide-container" id="slide1">
+    <div class="title-layout">
+        <div style="font-size: 40px; color: #ff823a; margin-bottom: -20px;"><i class="fa-solid fa-star"></i> 몸으로 말해요 <i class="fa-solid fa-star"></i></div>
+        <h1>방과 방 사이<br>스피드 퀴즈</h1>
+        <p>친구들의 몸짓을 보고 정답을 맞혀보세요!</p>
+        <div style="margin-top: 30px;">
+            <i class="fa-solid fa-shapes fa-spin" style="font-size: 60px; color: #bc84ee; margin: 0 20px;"></i>
+            <i class="fa-solid fa-bolt" style="font-size: 60px; color: #ff823a; margin: 0 20px;"></i>
+            <i class="fa-solid fa-face-laugh-squint" style="font-size: 60px; color: #dcfd8b; margin: 0 20px;"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 2: 게임 방법 -->
+<div class="slide-container" id="slide2">
+    <h2><i class="fa-solid fa-circle-question" style="color:#bc84ee"></i> 게임 방법</h2>
+    <div class="two-column">
+        <div class="text-content">
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 20px;">
+                    <span style="font-size: 30px; color: #ff823a; font-weight: bold;">1.</span>
+                    <strong>배경 클릭/화살표(→):</strong> 다음 단계로 넘어갑니다. (문제 제시 ↔ 가리기)
+                </li>
+                <li style="margin-bottom: 20px;">
+                    <span style="font-size: 30px; color: #22c55e; font-weight: bold;">2.</span>
+                    <strong>정답(+1) 버튼:</strong> 정답을 맞히면 누르세요. <strong>1점 획득</strong>하고 다음으로 넘어갑니다.
+                </li>
+                <li style="margin-bottom: 20px;">
+                    <span style="font-size: 30px; color: #bc84ee; font-weight: bold;">3.</span>
+                    <strong>화살표(←):</strong> 이전 상태로 되돌립니다.
+                </li>
+            </ul>
+        </div>
+        <div class="image-wrapper">
+            <img src="http://googleusercontent.com/image_collection/image_retrieval/9667106237550891033" alt="친구들이 즐겁게 퀴즈를 푸는 일러스트">
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: 1모둠 게임 -->
+<div class="slide-container theme-1" id="slide3">
+    <div class="game-board" id="board-1" data-group="1">
+        <div class="board-header">
+            <div class="quiz-counter" id="counter-1">1모둠</div>
+            <div class="score-board" id="score-1">0점</div>
+        </div>
+        
+        <div class="quiz-display" id="display-1">
+            <div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
+        </div>
+        
+        <div class="control-area">
+            <button class="btn btn-reset" id="btn-reset-1" data-group="1" title="초기화"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="btn btn-score" id="btn-score-1" data-group="1">⭕ 정답 (+1)</button>
+        </div>
+        <div class="keyboard-hint"><i class="fa-solid fa-keyboard"></i> 화살표 키</div>
+    </div>
+</div>
+
+<!-- Slide 4: 2모둠 게임 -->
+<div class="slide-container theme-2" id="slide4">
+    <div class="game-board" id="board-2" data-group="2">
+        <div class="board-header">
+            <div class="quiz-counter" id="counter-2">2모둠</div>
+            <div class="score-board" id="score-2">0점</div>
+        </div>
+
+        <div class="quiz-display" id="display-2">
+            <div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
+        </div>
+
+        <div class="control-area">
+            <button class="btn btn-reset" id="btn-reset-2" data-group="2" title="초기화"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="btn btn-score" id="btn-score-2" data-group="2">⭕ 정답 (+1)</button>
+        </div>
+        <div class="keyboard-hint"><i class="fa-solid fa-keyboard"></i> 화살표 키</div>
+    </div>
+</div>
+
+<!-- Slide 5: 3모둠 게임 -->
+<div class="slide-container theme-3" id="slide5">
+    <div class="game-board" id="board-3" data-group="3">
+        <div class="board-header">
+            <div class="quiz-counter" id="counter-3">3모둠</div>
+            <div class="score-board" id="score-3">0점</div>
+        </div>
+
+        <div class="quiz-display" id="display-3">
+            <div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
+        </div>
+
+        <div class="control-area">
+            <button class="btn btn-reset" id="btn-reset-3" data-group="3" title="초기화"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="btn btn-score" id="btn-score-3" data-group="3">⭕ 정답 (+1)</button>
+        </div>
+        <div class="keyboard-hint"><i class="fa-solid fa-keyboard"></i> 화살표 키</div>
+    </div>
+</div>
+
+<!-- Slide 6: 4모둠 게임 -->
+<div class="slide-container theme-4" id="slide6">
+    <div class="game-board" id="board-4" data-group="4">
+        <div class="board-header">
+            <div class="quiz-counter" id="counter-4">4모둠</div>
+            <div class="score-board" id="score-4">0점</div>
+        </div>
+
+        <div class="quiz-display" id="display-4">
+            <div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>
+        </div>
+
+        <div class="control-area">
+            <button class="btn btn-reset" id="btn-reset-4" data-group="4" title="초기화"><i class="fa-solid fa-rotate-right"></i></button>
+            <button class="btn btn-score" id="btn-score-4" data-group="4">⭕ 정답 (+1)</button>
+        </div>
+        <div class="keyboard-hint"><i class="fa-solid fa-keyboard"></i> 화살표 키</div>
+    </div>
+</div>
+
+<!-- Slide 7: 종료 -->
+<div class="slide-container" id="slide7">
+    <div class="title-layout">
+        <img src="http://googleusercontent.com/image_collection/image_retrieval/4740150287639453751" alt="퀴즈 종료 아이콘" style="width: 200px; height: 200px; object-fit: contain;">
+        <h1>수고하셨습니다!</h1>
+        <p>점수를 확인해보세요.</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. 데이터 및 상태 정의
+        const quizData = {
+            1: ["기린", "가위", "펭귄", "선풍기", "캥거루", "축구공", "안경", "청소기", "토끼", "칫솔", "호랑이", "자전거", "닭", "지우개", "돼지", "모자", "고양이", "젓가락", "자동차", "거북이"],
+            2: ["코끼리", "우산", "원숭이", "마이크", "사자", "숟가락", "오리", "컴퓨터", "곰", "가방", "소", "마스크", "말", "컵", "나비", "거울", "개구리", "책", "쥐", "기타"],
+            3: ["독수리", "리모컨", "상어", "열쇠", "고릴라", "배낭", "부엉이", "수건", "낙타", "지갑", "얼룩말", "베개", "돌고래", "달력", "하마", "비누", "다람쥐", "벨트", "사슴", "빗자루"],
+            4: ["판다", "계산기", "타조", "장갑", "악어", "시계", "백조", "목걸이", "너구리", "휴지", "공작새", "램프", "늑대", "냄비", "코알라", "드라이기", "양", "신발", "여우", "농구공"]
+        };
+
+        // score 추가
+        const gameState = {
+            1: { index: 0, viewMode: 'ready', score: 0 },
+            2: { index: 0, viewMode: 'ready', score: 0 },
+            3: { index: 0, viewMode: 'ready', score: 0 },
+            4: { index: 0, viewMode: 'ready', score: 0 }
+        };
+
+        const resetState = {
+            1: false, 2: false, 3: false, 4: false
+        };
+
+        let activeGroupId = null;
+
+        // 2. Intersection Observer
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.6 
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const board = entry.target;
+                    activeGroupId = board.dataset.group;
+                    document.querySelectorAll('.game-board').forEach(b => b.classList.remove('active-focus'));
+                    board.classList.add('active-focus');
+                }
+            });
+        }, observerOptions);
+
+        // 3. 이벤트 리스너 연결
+        document.querySelectorAll('.game-board').forEach(board => {
+            observer.observe(board);
+            
+            // 배경 클릭 -> 화살표 기능 (그냥 넘기기)
+            board.addEventListener('click', (e) => {
+                if (e.target.closest('button')) return; // 버튼 클릭 제외
+                const groupId = board.dataset.group;
+                nextStep(groupId);
+            });
+        });
+
+        // 리셋 버튼
+        document.querySelectorAll('.btn-reset').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const groupId = btn.dataset.group;
+                handleReset(groupId, btn);
+            });
+        });
+
+        // 정답(+1) 버튼
+        document.querySelectorAll('.btn-score').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const groupId = btn.dataset.group;
+                handleScoreAndNext(groupId);
+            });
+        });
+
+        // 키보드 이벤트
+        document.addEventListener('keydown', (e) => {
+            if (!activeGroupId) return;
+
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                nextStep(activeGroupId); // 화살표는 점수 추가 없이 넘기기
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevStep(activeGroupId);
+            }
+        });
+
+        // 4. 로직 함수들
+
+        // 다음 단계 (점수 변동 없음)
+        function nextStep(groupId) {
+            const state = gameState[groupId];
+            const words = quizData[groupId];
+            resetResetButton(groupId);
+
+            if (state.viewMode === 'ready') {
+                state.viewMode = 'show';
+                state.index = 0;
+            } else if (state.viewMode === 'show') {
+                state.viewMode = 'hide';
+            } else if (state.viewMode === 'hide') {
+                state.index++;
+                if (state.index >= words.length) {
+                    state.viewMode = 'end';
+                } else {
+                    state.viewMode = 'show';
+                }
+            }
+            updateDisplay(groupId);
+        }
+
+        // 정답 처리 (점수 +1 후 다음 단계)
+        function handleScoreAndNext(groupId) {
+            const state = gameState[groupId];
+            
+            // '전달하세요(hide)' 상태에서는 동작하지 않음 (안전장치)
+            if (state.viewMode === 'hide') return;
+
+            // 점수 증가
+            state.score++;
+            
+            // 다음 단계로 강제 이동
+            nextStep(groupId);
+        }
+
+        // 이전 단계
+        function prevStep(groupId) {
+            const state = gameState[groupId];
+            const words = quizData[groupId];
+            resetResetButton(groupId);
+
+            if (state.viewMode === 'end') {
+                state.viewMode = 'hide';
+                state.index = words.length - 1;
+            } else if (state.viewMode === 'hide') {
+                state.viewMode = 'show';
+            } else if (state.viewMode === 'show') {
+                if (state.index === 0) {
+                    state.viewMode = 'ready';
+                } else {
+                    state.viewMode = 'hide';
+                    state.index--;
+                }
+            }
+            updateDisplay(groupId);
+        }
+
+        // 화면 업데이트
+        function updateDisplay(groupId) {
+            const state = gameState[groupId];
+            const display = document.getElementById(`display-${groupId}`);
+            const counter = document.getElementById(`counter-${groupId}`);
+            const scoreBoard = document.getElementById(`score-${groupId}`);
+            const scoreBtn = document.getElementById(`btn-score-${groupId}`); // 버튼 선택
+            const words = quizData[groupId];
+
+            // 점수판 업데이트
+            scoreBoard.innerText = `${state.score}점`;
+
+            // 정답 버튼 상태 관리 ('전달하세요' 상태에서는 비활성화)
+            if (state.viewMode === 'hide' || state.viewMode === 'end' || state.viewMode === 'ready') {
+                scoreBtn.disabled = true;
+            } else {
+                scoreBtn.disabled = false;
+            }
+
+            if (state.viewMode === 'ready') {
+                counter.innerText = `${groupId}모둠`;
+                display.innerHTML = `<div style="font-size: 80px;"><i class="fa-solid fa-play"></i><br>클릭하여 시작</div>`;
+                display.className = "quiz-display";
+            } else if (state.viewMode === 'show') {
+                counter.innerText = `${groupId}모둠 - ${state.index + 1}/${words.length}`;
+                display.innerHTML = `<div>${words[state.index]}</div>`;
+                display.className = "quiz-display";
+            } else if (state.viewMode === 'hide') {
+                display.innerHTML = `<i class="fa-solid fa-arrow-right-long hidden-state"></i><div style="font-size:40px; margin-top:20px;">전달하세요!</div>`;
+            } else if (state.viewMode === 'end') {
+                counter.innerText = `${groupId}모둠 - 완료`;
+                display.innerHTML = `<div style="font-size: 60px; color: #ef4444;">끝!</div>`;
+            }
+        }
+
+        // 리셋 로직
+        function handleReset(groupId, btn) {
+            if (!resetState[groupId]) {
+                resetState[groupId] = true;
+                btn.classList.add('confirming');
+            } else {
+                gameState[groupId] = { index: 0, viewMode: 'ready', score: 0 }; // 점수도 0으로
+                updateDisplay(groupId);
+                resetResetButton(groupId);
+            }
+        }
+
+        function resetResetButton(groupId) {
+            resetState[groupId] = false;
+            const btn = document.getElementById(`btn-reset-${groupId}`);
+            if (btn) {
+                btn.classList.remove('confirming');
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
